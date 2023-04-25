@@ -1,0 +1,26 @@
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  background-color: #eee;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ccc;
+  background-color: #ddd;
+}
+.main {
+  flex: 1;
+}
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #ccc;
+
+  background-color: #ddd;
+}
