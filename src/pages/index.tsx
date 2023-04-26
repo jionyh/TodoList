@@ -1,124 +1,121 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { EmptyTodo } from '@/components/EmptyTodo'
+import { AiOutlinePlusCircle } from 'react-icons/ai'
+import { v4 as uuid } from 'uuid'
+import { Todo } from '@/components/Todo'
+import { TodoType } from '@/types/todo'
+import { useEffect, useState } from 'react'
 
-const inter = Inter({ subsets: ['latin'] })
+type TodoDone = {
+  total: number
+  done: number
+}
 
-export default function Home() {
+const TodoList = () => {
+  const [todos, setTodos] = useState<TodoType[]>([])
+  const [inputTodo, setInputTodo] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [todoDone, setTodoDone] = useState<TodoDone>({ total: 0, done: 0 })
+
+  function checkTodoStorage() {
+    setLoading(true)
+    const todo = localStorage.getItem('todo')
+    if (todo) {
+      let newTodo: TodoType[] = JSON.parse(todo)
+      setTodos(newTodo)
+      let total = newTodo.length
+      let done = newTodo.filter((item) => item.done === true).length
+      setTodoDone({ total, done })
+      setLoading(false)
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    checkTodoStorage()
+  }, [])
+
+  function addTodo() {
+    let id = uuid()
+    let newTodos = [...todos, { id, todo: inputTodo, done: false }]
+    localStorage.setItem('todo', JSON.stringify(newTodos))
+    checkTodoStorage()
+    setInputTodo('')
+  }
+
+  function deleteTodo(id: string) {
+    let newTodos = todos.filter((item) => item.id !== id)
+    localStorage.setItem('todo', JSON.stringify(newTodos))
+    checkTodoStorage()
+  }
+
+  function markTodoDone(id: string) {
+    let markedTodo = todos
+    markedTodo.filter((item) => item.id === id).forEach((item) => (item.done = !item.done))
+    localStorage.setItem('todo', JSON.stringify(markedTodo))
+    checkTodoStorage()
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <>
+      {loading ? (
+        <div>Carregando</div>
+      ) : (
+        <main className='lg:mx-[300px] p-3'>
+          <div className='mt-[-27px] flex'>
+            <input
+              className='bg-cinza-500 border-[1px] border-cinza-700 text-cinza-300 text-base p-4 rounded-lg flex-1 focus:outline-none focus:border-purple-dark focus:text-cinza-100'
+              type='text'
+              autoFocus
+              placeholder='Adicione uma nova tarefa'
+              value={inputTodo}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputTodo(e.target.value)}
             />
-          </a>
-        </div>
-      </div>
+            <button
+              className='ml-2 flex p-4 items-center cursor-pointer bg-blue-dark rounded-lg text-cinza-100 hover:bg-blue'
+              onClick={addTodo}>
+              Criar{' '}
+              <AiOutlinePlusCircle
+                className='ml-2'
+                size={18}
+              />
+            </button>
+          </div>
+          <div className='mt-16'>
+            <div className='flex justify-between text-sm font-bold'>
+              <span className='text-purple'>
+                Tarefas Criadas
+                <span className='bg-cinza-400 rounded-full text-cinza-200 py-0.5 px-2 ml-3'>{todoDone.total}</span>
+              </span>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+              <span className='text-purple'>
+                Tarefas Concluídas
+                <span className='bg-cinza-400 rounded-full text-cinza-200 py-0.5 px-2 ml-3'>
+                  {todoDone.done} de {todoDone.total}
+                </span>
+              </span>
+            </div>
+            <div className='flex flex-col gap-1 mt-6'>
+              {todos.length === 0 ? (
+                <EmptyTodo />
+              ) : (
+                todos.map((item) => (
+                  <Todo
+                    key={item.id}
+                    id={item.id}
+                    todo={item.todo}
+                    done={item.done}
+                    fnDelete={deleteTodo}
+                    fnEdit={markTodoDone}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </main>
+      )}
+    </>
   )
 }
+
+export default TodoList
