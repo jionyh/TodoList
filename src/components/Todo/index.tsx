@@ -7,7 +7,7 @@ type Props = {
   todo: string
   done: boolean
   fnDelete?: (id: string) => void
-  fnEdit?: (id: string) => void
+  fnEdit?: (id: string, done: boolean) => void
 }
 
 export const Todo = ({ id, todo, done, fnDelete, fnEdit }: Props) => {
@@ -18,7 +18,7 @@ export const Todo = ({ id, todo, done, fnDelete, fnEdit }: Props) => {
 
   const handleEdit = () => {
     if (!fnEdit) return
-    fnEdit(id)
+    fnEdit(id, done)
   }
 
   return (
